@@ -30,6 +30,7 @@ jobs:
           newman run ReqRes_Collection.json \
             -e ReqRes_Environment.json \
             -d users.csv \
+            --delay-request 1000 \
             --env-var "reqresApiKey=$REQRES_API_KEY" \
             --reporters cli,htmlextra \
             --reporter-htmlextra-export report.html
