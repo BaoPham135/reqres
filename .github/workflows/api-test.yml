@@ -1,0 +1,48 @@
+name: Automated API Tests (Newman)
+
+# Kích hoạt tự động mỗi khi có sự kiện push lên nhánh main
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  postman-api-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Bước 1: Lấy code từ repository về máy trạm của GitHub (Runner)
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # Bước 2: Cài đặt môi trường Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      # Bước 3: Cài đặt Newman CLI và newman-reporter-htmlextra
+      - name: Install Newman & HTMLExtra Reporter
+        run: |
+          npm install -g newman
+          npm install -g newman-reporter-htmlextra
+
+      # Bước 4: Thực thi lệnh kiểm thử hướng dữ liệu
+      - name: Run API Tests with Newman
+        run: |
+          newman run ReqRes_Collection.json \
+            -e ReqRes_Environment.json \
+            -d users.csv \
+            --reporters cli,htmlextra \
+            --reporter-htmlextra-export report.html
+        # Mẹo: Nếu bạn dùng Secrets, bạn có thể truyền biến vào môi trường bằng tham số:
+        # --env-var "api-key=${{ secrets.API_KEY }}"
+
+      # Bước 5: Upload tệp báo cáo report.html thành Artifact
+      # Dùng if: always() để đảm bảo report luôn được upload dù test case có fail
+      - name: Upload Test Report Artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: API-Test-Report
+          path: report.html
