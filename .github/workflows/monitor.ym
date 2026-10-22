@@ -1,26 +1,17 @@
-name: API Performance Monitor (Shift-Right)
+name: Automated API tests using Postman CLI
 
-on:
-  schedule:
-    - cron: '0 * * * *'
-  workflow_dispatch:
+on: push
 
 jobs:
-  monitoring:
+  automated-api-tests:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-
-      - name: Install Newman
-        run: npm install -g newman
-
-      - name: Run API Availability & Performance Tests
+      - uses: actions/checkout@v4
+      - name: Install Postman CLI
         run: |
-          newman run ReqRes_Monitor.json
+          curl -o- "https://dl-cli.pstmn.io/install/linux64.sh" | sh
+      - name: Login to Postman CLI
+        run: postman login --with-api-key ${{ secrets.POSTMAN_API_KEY }}
+      - name: Run API tests
+        run: |
+          postman collection run "59055457-59e576ef-4c12-4964-b5b2-0c2ecabe0a0b"
